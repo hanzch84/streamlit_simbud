@@ -28,9 +28,12 @@ st.markdown(
             font-family: 'Nanum Gothic Coding', monospace !important;
             font-size: 14px;color: #FFC83D;}
 
+
         /* 텍스트 정렬 */
         input[type="number"] { text-align: right; }
-        h1,h3 { text-align: center; }
+        h1{ text-align: center; }
+        h3 { text-align: right; }
+        
 
         /* 체크박스 스타일 */
         [data-testid="stCheckbox"] {
@@ -43,12 +46,12 @@ st.markdown(
         input[type="number"], textarea[aria-label="결과 출력"], input[type="text"], 
         [data-testid="stVerticalBlock"] > div:first-child {
             margin: -4px;}
-        input[aria-label="budget"]{margin: 0px;font-size: 24px;}
+        input[aria-label="budget"]{margin: 0px;font-size: 24px;font-weight: bold;}
         
         [data-testid="stNotificationContentWarning"]{margin: -8px;font-size: 16px;}
 
         /* 특정 텍스트에리어의 색상 */
-        h,h3, [aria-label="사용할 예산"], p { color: #FFC83D; }
+        h3, p { color: #FFC83D; }
         [data-testid="baseButton-secondary"],[data-testid="stDataFrameResizable"]{width: 100% !important;}
 
     </style>
