@@ -349,6 +349,8 @@ with col_right:
         elif max(item_prices) > budget_input: result_text = '예산이 부족합니다.'
         elif max_limit < budget_input: result_text = f'최대구매금액({max_limit:,d}원)이 예산({budget_input:,d}원)보다 작아 예산을 다 쓸 수 없습니다.'
         elif fixed_budget > budget_input: result_text = f'최소구매금액({fixed_budget:,d}원)이 예산({budget_input:,d}원)보다 많아 예산 내에서 쓸 수 없습니다.'
+        elif len(item_prices) != len(set(item_prices)): result_text= '중복된 단가가 있습니다.'
+
         else:
             # 스피너를 표시하면서 계산 진행
             with st.spinner('계산 중...'):
