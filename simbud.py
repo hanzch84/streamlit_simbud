@@ -28,12 +28,9 @@ st.markdown(
             font-family: 'Nanum Gothic Coding', monospace !important;
             font-size: 14px;color: #FFC83D;}
 
-
         /* 텍스트 정렬 */
         input[type="number"] { text-align: right; }
-        h1{ text-align: center; }
-        h3 { text-align: right; }
-        
+        h1,h3{ text-align: center; }        
 
         /* 체크박스 스타일 */
         [data-testid="stCheckbox"] {
@@ -257,7 +254,7 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
 result_list, result_prices = [], []
 
 st.title("👌알잘딱깔센 예산 🍞원 만들기😊")
-st.subheader('SimBud beta(Budget Simulator V0.98)')
+st.markdown('<p style="color: #777777;text-align: right;">SimBud beta (Budget Simulator V0.98), 버그 신고 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
 
 col_label_budget, col_input_budget = st.columns([2.5,7.5])
 with col_label_budget:
