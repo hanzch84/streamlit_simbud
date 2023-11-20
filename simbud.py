@@ -241,8 +241,6 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
 
         # 모든 행에 더하기
         list_show = (np.array(list_show) + np.array(base_quantity)).tolist()
-
-
         text_out += f'이 프로그램은 {cases_count + 1:,d}개의 케이스를 계산했습니다.\n'
         return text_out, list_show, prices # 결과를 리턴
 
@@ -254,7 +252,7 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
 result_list, result_prices = [], []
 
 st.title("👌알잘딱깔센 예산 🍞원 만들기😊")
-st.markdown('<p style="color: #777777;text-align: right;">SimBud beta (Budget Simulator V0.98), 버그 신고 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
+st.markdown('<p style="color: #888888;text-align: right;">SimBud beta (Budget Simulator V0.98), 버그 신고 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
 
 col_label_budget, col_input_budget = st.columns([2.5,7.5])
 with col_label_budget:
