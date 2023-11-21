@@ -219,8 +219,10 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
                 # 예산에 정확히 맞는 경우, case_exact 리스트에 결과를 추가합니다.
                 if (balances[last_index] == 0):
                     cases_exact.append(list(quantities))
+                elif len(cases_exact) > 0: #완벽한 케이스를 하나라도 찾으면 가속을 위해 나머지는 무시합니다.
+                    pass
                 #예산이 남는 경우, case_close 리스트에 결과를 추가합니다.
-                elif (balances[last_index] > 0) and (balances[last_index] < prices[last_index]):
+                elif (balances[last_index] > 0): # and (balances[last_index] < prices[last_index]):
                     cases_close.append(list(quantities))
 
             # 다음 케이스 계산 준비
@@ -238,7 +240,7 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
             list_show = cases_close
 
         else: # 완벽한 결과가 있으면 결과로 설정
-            text_out += f'{total_budget:7,d}원의 예산에 맞는 {len(cases_exact):,d}개의 완벽한 방법을 찾았습니다.\n'
+            text_out += f'예산에 맞는 {len(cases_exact):,d}개의 완벽한 방법을 찾았습니다.\n'
             list_show = cases_exact
 
         # 모든 행에 더하기
