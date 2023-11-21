@@ -4,7 +4,6 @@ import pandas as pd
 import unicodedata
 import time
 
-
 result_text = '''예산과 단가를 입력한 후\n계산하기 버튼을 누르면,
 예산에 딱 맞게 물건을\n살 수 있는 방법을 찾아줍니다.\n
 데이터프레임으로 출력된 결과에
@@ -16,8 +15,6 @@ result_text = '''예산과 단가를 입력한 후\n계산하기 버튼을 누�
 기본 구매량과 최대 구매량을 제한할 수 있습니다.
 '''
 # ＊스타일 구역＊ Streamlit 페이지에 CSS를 추가
-# 모든 숫자 입력란의 텍스트를 오른쪽으로 정렬합니다.
-# 폰트 및 크기 설정
 st.markdown(
     """
     <style>
@@ -52,24 +49,7 @@ st.markdown(
         /* 특정 텍스트에리어의 색상 */
         h3, p { color: #FFC83D; }
         [data-testid="baseButton-secondary"],[data-testid="stDataFrameResizable"]{width: 100% !important;}
-<style>
-.overlay {
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); 
-    z-index: 999; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-}
-.spinner {
-    margin-bottom: 10px; 
-}
-    </style>
-    """, unsafe_allow_html=True)
+    </style>""", unsafe_allow_html=True)
 
 # ＊함수 구역＊
 # 문자열의 출력 길이를 구하는 함수(텍스트박스, 콘솔 출력용)
@@ -271,7 +251,7 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
 # 웹 앱 UI 구현
 result_list, result_prices = [], []
 
-st.title("👌알잘딱깔센 예산 🍞원 만들기😊")
+st.title("👌알잘딱깔센 예산 🍞 만들기😊")
 st.markdown('<p style="color: #888888;text-align: right;">SimBud beta (Budget Simulator V0.98), 버그 신고 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
 
 col_label_budget, col_input_budget = st.columns([2.5,7.5])
