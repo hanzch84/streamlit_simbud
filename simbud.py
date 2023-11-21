@@ -40,10 +40,8 @@ st.markdown(
 
         /* 여백과 간격 조정 */
         input[type="number"], textarea[aria-label="결과 출력"], input[type="text"], 
-        [data-testid="stVerticalBlock"] > div:first-child {
-            margin: -4px;}
+        [data-testid="stVerticalBlock"] > div:first-child {margin: -4px;}
         input[aria-label="budget"]{margin: 0px;font-size: 24px;font-weight: bold;}
-        
         [data-testid="stNotificationContentWarning"]{margin: -8px;font-size: 16px;}
 
         /* 특정 텍스트에리어의 색상 */
