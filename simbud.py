@@ -369,11 +369,8 @@ with col_right:
         elif len(item_prices) != len(set(item_prices)): result_text= '중복된 단가가 있습니다.'
 
         else:
-            # 스피너를 표시하면서 계산 진행
-
-            # 오버레이와 스피너를 위한 컨테이너 생성
+            # 스피너를 표시하면서 계산 진행 오버레이와 스피너를 위한 컨테이너 생성
             overlay_container = st.empty()
-
             # 오버레이와 스피너 추가
             overlay_container.markdown("""
             <style>
