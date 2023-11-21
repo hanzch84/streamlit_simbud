@@ -113,6 +113,7 @@ def on_budget_change():
     budget = st.session_state.get("budget", 0)
     for i in range(st.session_state.item_count):
         update_item_availability(i, budget)
+        on_max_change(i)
 
 # 단가 변경 시 호출되는 함수
 def on_price_change():
