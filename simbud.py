@@ -52,7 +52,22 @@ st.markdown(
         /* 특정 텍스트에리어의 색상 */
         h3, p { color: #FFC83D; }
         [data-testid="baseButton-secondary"],[data-testid="stDataFrameResizable"]{width: 100% !important;}
-
+<style>
+.overlay {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); 
+    z-index: 999; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+.spinner {
+    margin-bottom: 10px; 
+}
     </style>
     """, unsafe_allow_html=True)
 
@@ -355,9 +370,27 @@ with col_right:
 
         else:
             # 스피너를 표시하면서 계산 진행
-            with st.spinner('계산 중...'):
-                # 계산 결과를 구합니다.
-                result_text, result_list, result_prices = calculate_budget(budget_input, item_names, item_prices,min_quantities,max_quantities)
+
+            # 오버레이와 스피너를 위한 컨테이너 생성
+            overlay_container = st.empty()
+
+            # 오버레이와 스피너 추가
+            overlay_container.markdown("""
+            <style>
+            .overlay {
+                position: fixed;top: 0;left: 0;width: 100%;height: 100%;
+                background: rgba(0, 0, 0, 0.5);z-index: 999;display: flex;
+                justify-content: center;align-items: center;                }
+            .spinner {margin-bottom: 10px;}
+            </style>
+            <div class="overlay"><div><div class="spinner">
+                        <span class="fa fa-spinner fa-spin fa-3x"></span>
+                    </div><div style="color: white;">계산 중...</div></div></div>""", unsafe_allow_html=True)
+
+            # 계산 결과를 구합니다.
+            result_text, result_list, result_prices = calculate_budget(budget_input, item_names, item_prices,min_quantities,max_quantities)
+            # 작업이 완료되면 오버레이와 스피너를 제거합니다.
+            overlay_container.empty()
 if len(result_text.split('\n'))<30:
     st.code(result_text, language="java")
 else:
