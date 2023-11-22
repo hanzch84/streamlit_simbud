@@ -89,6 +89,7 @@ def update_item_availability(i, budget):
 # 예산 변경 시 호출되는 함수
 def on_budget_change():
     budget = st.session_state.get("budget", 0)
+    
     for i in range(st.session_state.item_count):
         update_item_availability(i, budget)
         on_max_change(i)
@@ -339,6 +340,8 @@ with col_label_fixed:
 # 계산 버튼 클릭 이벤트 핸들러
 with col_right:
     if st.button("계산하기"):
+        if budget_input != st.session_state.get("budget",0):
+            on_budget_change()
         if budget_input == "" or budget_input <= 0: result_text = '예산을 정확히 입력하세요.(*0보다 큰 자연수)'
         elif len(item_prices) <= 1: result_text = '최소 2종류 이상의 단가를 입력하세요.'
         elif min(item_prices) <= 0: result_text = '단가가 0보다 작거나 같습니다.'
@@ -374,7 +377,7 @@ else:
 
 # 새로운 열 '금액'을 계산하고 데이터프레임에 추가합니다.
 try:
-    df = pd.DataFrame(result_list, columns=result_prices)
+    df = pd.DataFrame(result_list, columns=[f'{price:,d}원' for price in result_prices])
     df['금액'] = df.mul(result_prices).sum(axis=1)
     if df.__len__() != 0:
         st.dataframe(df,hide_index=True,width=800) # 결과를 화면에 표시합니다.
