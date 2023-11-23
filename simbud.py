@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 import unicodedata
 import time
+import csv
+import os
+
 
 result_text = '''예산과 단가를 입력한 후\n계산하기 버튼을 누르면,
 예산에 딱 맞게 물건을\n살 수 있는 방법을 찾아줍니다.\n
@@ -50,6 +53,23 @@ st.markdown(
     </style>""", unsafe_allow_html=True)
 
 # ＊함수 구역＊
+
+def logger(file_name,execution_time,complexity):
+    # Check if the file exists
+    file_exists = os.path.exists(file_name)
+    # Open the file in append mode if it exists, or create a new file
+    with open(file_name, mode='a' if file_exists else 'w', newline='') as file:
+        writer = csv.writer(file)
+
+        # If the file is newly created, add a header row
+        if not file_exists:
+            writer.writerow(['Complexity', 'Execution Time'])
+
+        # Add the complexity and execution time to the last line
+        writer.writerow([complexity, execution_time])
+
+    print("Data has been added to the CSV file.")
+
 # 문자열의 출력 길이를 구하는 함수(텍스트박스, 콘솔 출력용)
 def get_print_length(s):
     screen_length = 0
@@ -177,6 +197,8 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
         # 제한된 구매량으로 가능한 누적 구매액 purchasables을 구합니다.
         #limited_costs = [n * p for n, p in zip(limits, prices)]
         #spendables = [sum(limited_costs[i:]) for i in range(len(limited_costs))]
+        complexity = np.prod(np.array(limits[:-1])+1)
+        
 
         time_limit = 20  # 초 단위 연산시간제한
         start_time = time.time()
@@ -184,9 +206,10 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
         while not (node == -1 and is_overrun == True):
             # 현재 시간 확인
             current_time = time.time()
+            execution_time = current_time - start_time
             # 시간 제한 초과 검사
-            if current_time - start_time > time_limit:
-                raise TimeoutError(f"시간초과 에러 {current_time - start_time:,.4f}초 경과: 연산이 너무 복잡합니다.")
+            if execution_time > time_limit:
+                raise TimeoutError(f"시간초과 에러 {execution_time:,.4f}초 경과: 연산이 너무 복잡합니다.\n복잡도: {complexity:,}")
             # 랙 연산의 첫 인덱스를 위해 balances[-1]에 budget을저장합니다.
             balances[-1] = budget
             # quantity[n]의 아이템 개수와 단가의 곱만큼 예산에서 빼고 잔액에 저장합니다.(마지막 아이템 제외)
@@ -227,7 +250,8 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
         end_time = time.time()
         execution_time = end_time - start_time
         print(f"실행 시간: {execution_time}초")
-        
+        logger("complexity_time.csv",f"{execution_time:.6f}",f"{complexity}")
+
         # 계산 결과 출력 부분
         if len(cases_exact) == 0: # 완벽한 결과가 없으면 근사치 리스트를 결과로 설정
             text_out += f'{total_budget:,d}원의 예산에 맞게 구입할 방법이 없습니다.\n'
@@ -245,6 +269,7 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
 
     except Exception as e:
         print('Error Message:', e)
+        logger("complexity_time.csv",f"{execution_time:.6f}",f"{complexity}")
         return f'에러입니다.:{e}', [], prices # 에러 처리된 결과를 리턴
 
 # 웹 앱 UI 구현
