@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import unicodedata
 import time
+from functools import reduce
 
 result_text = '''예산과 단가를 입력한 후\n계산하기 버튼을 누르면,
 예산에 딱 맞게 물건을\n살 수 있는 방법을 찾아줍니다.\n
@@ -51,6 +52,13 @@ st.markdown(
 
 # ＊함수 구역＊
 # 문자열의 출력 길이를 구하는 함수(텍스트박스, 콘솔 출력용)
+
+def get_conmplexcity(price, max, min):
+    last_index = price.label(min(price))
+    combination = [x-y+1 for x,y in zip(max,min)]
+    combination[last_index] = 1
+    return reduce(lambda x, y: x * y, my_list)
+    
 def get_print_length(s):
     screen_length = 0
     for char in s:
@@ -174,12 +182,8 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
         budget -= fixed_budget
         #최소 구매량을 뺀 최대 구매 개수를 구합니다.
         limits = [lim - base for lim, base in zip(limited_quantity, base_quantity)]
-        # 제한된 구매량으로 가능한 누적 구매액 purchasables을 구합니다.
-        #limited_costs = [n * p for n, p in zip(limits, prices)]
-        #spendables = [sum(limited_costs[i:]) for i in range(len(limited_costs))]
         complexity = np.prod(np.array(limits[:-1])+1)
         
-
         time_limit = 20  # 초 단위 연산시간제한
         start_time = time.time()
         # 연산 코어 모듈
@@ -254,7 +258,7 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
 result_list, result_prices = [], []
 
 st.title("👌알잘딱깔센 예산 🍞 만들기😊")
-st.markdown('<p style="color: #888888;text-align: right;">SimBud beta (Budget Simulator V0.98), 버그 신고 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
+st.markdown('<p style="color: #a8a888;text-align: right;">SimBud beta (Budget Simulator V0.98), 버그 신고 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
 
 col_label_budget, col_input_budget = st.columns([2.5,7.5])
 with col_label_budget:
@@ -378,9 +382,9 @@ if len(result_text.split('\n'))<30:
 else:
     st.text_area("결과 출력", result_text, height=300)
 
-# 새로운 열 '금액'을 계산하고 데이터프레임에 추가합니다.
 try:
     df = pd.DataFrame(result_list, columns=[f'{price:,d}원' for price in result_prices])
+    # 새로운 열 '금액'을 계산하고 데이터프레임에 추가합니다.
     df['금액'] = df.mul(result_prices).sum(axis=1)
     if df.__len__() != 0:
         st.dataframe(df,hide_index=True, use_container_width=True) # 결과를 화면에 표시합니다.
