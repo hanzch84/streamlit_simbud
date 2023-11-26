@@ -21,7 +21,7 @@ st.markdown(
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
         .custom-background {
-    background-color: #021117;
+    background-color: #021117;}
 
         /* 폰트와 텍스트 스타일 설정 */
         .stTextInput, .stButton > button, .stSelectbox, .stDateInput, .stTimeInput, 
