@@ -56,7 +56,7 @@ def get_conmplexcity(price, max, min):
     last_index = price.label(min(price))
     combination = [x-y+1 for x,y in zip(max,min)]
     combination[last_index] = 1
-    return reduce(lambda x, y: x * y, my_list)
+    return reduce(lambda x, y: x * y, combination)
     
 def get_print_length(s):
     screen_length = 0
