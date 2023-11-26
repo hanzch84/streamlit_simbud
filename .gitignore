@@ -2,7 +2,7 @@
 #/폴더명/
 #/파일명.확장자
 #/*.확장자
-/.streamlit/
+#/.streamlit/
 /*.ipynb
 /*.csv
 /test_*.py
