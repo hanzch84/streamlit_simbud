@@ -21,7 +21,7 @@ st.markdown(
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
         body{
-            background-color: #0e1117
+            background-color: #0e1117;
 
         }
 
