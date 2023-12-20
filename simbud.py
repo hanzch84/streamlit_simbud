@@ -257,7 +257,7 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
 result_list, result_prices = [], []
 
 st.title("👌알잘딱깔센 예산 🍞 만들기😊")
-st.markdown('<p style="color: #a8a888;text-align: right;">SimBud beta (Budget Simulator V0.98), 버그 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com, 교사 박현수</a></p>', unsafe_allow_html=True)
+st.markdown('<p style="color: #a8a888;text-align: right;">SimBud beta (Budget Simulator V0.98)by 교사 박현수, 버그 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
 
 col_label_budget, col_input_budget = st.columns([2.5,7.5])
 with col_label_budget:
