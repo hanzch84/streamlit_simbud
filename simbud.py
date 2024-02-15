@@ -96,8 +96,6 @@ def update_item_availability(i, budget):
 # 예산 변경 시 호출되는 함수
 def on_budget_change():
     budget = st.session_state.get("budget", 0)
-    if 'item_count' not in st.session_state:
-        st.session_state.item_count = 0  # 또는 적절한 초기값
     for i in range(st.session_state.item_count):
         update_item_availability(i, budget)
         on_max_change(i)
@@ -266,7 +264,7 @@ with col_label_budget:
 with col_input_budget:
     # 예산 입력란
     budget_input = st.number_input("budget", min_value=0, key="budget", help="사용해야하는 예산을 입력하세요.",
-                                on_change=on_budget_change(), format="%d", label_visibility='collapsed')
+                                on_change=on_budget_change, format="%d", label_visibility='collapsed')
 
 # session_state를 확인하여 물품 개수를 관리합니다.
 if 'item_count' not in st.session_state:
