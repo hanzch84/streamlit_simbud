@@ -96,9 +96,10 @@ def update_item_availability(i, budget):
 # 예산 변경 시 호출되는 함수
 def on_budget_change():
     budget = st.session_state.get("budget", 0)
-    for i in range(st.session_state.item_count):
-        update_item_availability(i, budget)
-        on_max_change(i)
+    if 'item_count' in st.session_state:
+        for i in range(st.session_state.item_count):
+            update_item_availability(i, budget)
+            on_max_change(i)
 
 # 단가 변경 시 호출되는 함수
 def on_price_change():
@@ -310,7 +311,7 @@ for i in range(st.session_state.item_count):
                                      min_value=0,
                                      key=f"item_price_{i}",
                                      value=0,
-                                     on_change=on_price_change(),  # 여기에 이벤트 핸들러를 연결합니다.
+                                     on_change=on_price_change,  # 여기에 이벤트 핸들러를 연결합니다.
                                      disabled=is_disabled, format="%d", label_visibility='collapsed')
     with col5:
         # 체크박스를 만들고 session state value를 만듭니다.
@@ -334,7 +335,7 @@ def add_item():
 
 # 물품추가 버튼에 콜백 함수 연결
 with col_left:
-    if st.button("물품추가", on_click=add_item()):
+    if st.button("물품추가", on_click=add_item):
         pass
 
 with col_label_fixed:
