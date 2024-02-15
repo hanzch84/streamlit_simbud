@@ -96,6 +96,7 @@ def update_item_availability(i, budget):
 # 예산 변경 시 호출되는 함수
 def on_budget_change():
     budget = st.session_state.get("budget", 0)
+    
     for i in range(st.session_state.item_count):
         update_item_availability(i, budget)
         on_max_change(i)
@@ -255,7 +256,7 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
 # 웹 앱 UI 구현
 result_list, result_prices = [], []
 
-st.title("😊편리한 예산🍞 만들기👌")
+st.title("👌 편리한 예산 🍞 만들기 😊")
 st.markdown('<p style="color: #a8a888;text-align: right;">SimBud beta (Budget Simulator V0.98)by 교사 박현수, 버그 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
 
 col_label_budget, col_input_budget = st.columns([2.5,7.5])
@@ -264,7 +265,7 @@ with col_label_budget:
 with col_input_budget:
     # 예산 입력란
     budget_input = st.number_input("budget", min_value=0, key="budget", help="사용해야하는 예산을 입력하세요.",
-                                on_change=on_budget_change(), format="%d", label_visibility='collapsed')
+                                on_change=on_budget_change, format="%d", label_visibility='collapsed')
 
 # session_state를 확인하여 물품 개수를 관리합니다.
 if 'item_count' not in st.session_state:
@@ -310,7 +311,7 @@ for i in range(st.session_state.item_count):
                                      min_value=0,
                                      key=f"item_price_{i}",
                                      value=0,
-                                     on_change=on_price_change(),  # 여기에 이벤트 핸들러를 연결합니다.
+                                     on_change=on_price_change,  # 여기에 이벤트 핸들러를 연결합니다.
                                      disabled=is_disabled, format="%d", label_visibility='collapsed')
     with col5:
         # 체크박스를 만들고 session state value를 만듭니다.
