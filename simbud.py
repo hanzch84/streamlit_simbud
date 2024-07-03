@@ -29,7 +29,8 @@ st.markdown(
 
         /* 텍스트 정렬 */
         input[type="number"] { text-align: right; }
-        h1,h3{ text-align: center; }        
+        h1{ text-align: center;}        
+        h3{ text-align: left; margin-right: 0;margin-top: 0;padding-top: 0;padding-right: 0;line-height: 1.2;}        
 
         /* 체크박스 스타일 */
         [data-testid="stCheckbox"] {
@@ -40,9 +41,16 @@ st.markdown(
 
         /* 여백과 간격 조정 */
         input[type="number"], textarea[aria-label="결과 출력"], input[type="text"], 
-        [data-testid="stVerticalBlock"] > div:first-child {margin: -4px;}
+        [data-testid="stVerticalBlock"] > div:first-child {margin: 2px;}
         input[aria-label="budget"]{margin: 0px;font-size: 24px;font-weight: bold;}
         [data-testid="stNotificationContentWarning"]{margin: -8px;font-size: 16px;}
+
+/* stHorizontalBlock 요소 간의 간격 조절 */
+[data-testid="stHorizontalBlock"] {
+    margin-bottom: -18px; /* 기존보다 작은 값으로 설정하여 간격 줄이기 */
+}
+
+
 
         /* 특정 텍스트에리어의 색상 */
         h3, p { color: #FFC83D; }
@@ -259,7 +267,7 @@ result_list, result_prices = [], []
 st.title("👌편리한 예산🍞만들기😊")
 st.markdown('<p style="color: #a8a888;text-align: right;">SimBud beta (Budget Simulator V0.98)by 교사 박현수, 버그 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
 
-col_label_budget, col_input_budget = st.columns([2.5,7.5])
+col_label_budget, col_input_budget = st.columns([2.5,7.4])
 with col_label_budget:
     st.subheader("사용할 예산")
 with col_input_budget:
