@@ -56,6 +56,10 @@ st.markdown(
             
         }
 
+        .stDataFrame { 
+        width: 100% !important;
+        }
+
         /* 특정 텍스트에리어의 색상 */
         h3, p { color: #FFC83D; }
         [data-testid="baseButton-secondary"],[data-testid="stDataFrameResizable"]{width: 100% !important;}
