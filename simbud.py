@@ -303,7 +303,7 @@ result_list, result_prices = [], []
 st.title("편리한 예산🍞만들기")
 st.markdown('<p style="color: #a8a888;text-align: right;">SimBud beta (Budget Simulator V1.00)by 교사 박현수, 버그 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
 
-col_label_budget, col_input_budget = st.columns([2.6, 7.4])
+col_label_budget, col_input_budget = st.columns([3, 7])
 with col_label_budget:
     st.subheader("사용할 예산")
 with col_input_budget:
