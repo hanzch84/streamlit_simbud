@@ -6,6 +6,25 @@ import time
 from functools import reduce
 
 # startupdate
+st.markdown(
+    """
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            function selectAllText(event) {
+                event.target.select();
+            }
+
+            // 모든 입력 필드에 이벤트 리스너 추가
+            let inputs = document.querySelectorAll("input, textarea");
+            inputs.forEach(input => {
+                input.addEventListener("focus", selectAllText);
+            });
+        });
+    </script>
+    """,
+    unsafe_allow_html=True
+)
+
 # endupdate
 
 result_text = '''예산과 단가를 입력한 후\n계산하기 버튼을 누르면,
