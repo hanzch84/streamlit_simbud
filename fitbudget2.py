@@ -33,6 +33,20 @@ st.markdown(
         .stDataFrame { width: 100% !important; }
         h3, p { color: #FFC83D; }
         [data-testid="baseButton-secondary"],[data-testid="stDataFrameResizable"]{width: 100% !important;}
+        
+        /* 정렬 버튼 스타일 */
+        button[kind="secondary"][data-testid="stBaseButton-secondary"] {
+            background-color: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            font-size: 14px !important;
+            color: #FFC83D !important;
+            cursor: pointer;
+        }
+        button[kind="secondary"][data-testid="stBaseButton-secondary"]:hover {
+            color: #FFE082 !important;
+            text-decoration: underline;
+        }
     </style>""", unsafe_allow_html=True)
 
 # ＊함수 구역＊
@@ -468,18 +482,74 @@ with col_input_budget:
 if 'item_count' not in st.session_state:
     st.session_state.item_count = 5
 
-# 아이템 헤더
+# 정렬 상태 초기화
+if 'sort_key' not in st.session_state:
+    st.session_state.sort_key = None
+    st.session_state.sort_ascending = True
+
+def get_sorted_indices():
+    """현재 정렬 기준에 따라 정렬된 인덱스 반환"""
+    items = []
+    for i in range(st.session_state.item_count):
+        items.append({
+            'index': i,
+            'name': st.session_state.get(f'item_name_{i}', ''),
+            'price': st.session_state.get(f'item_price_{i}', 0),
+            'min': st.session_state.get(f'item_min_{i}', 0),
+            'max': st.session_state.get(f'item_max_{i}', 0),
+        })
+    
+    sort_key = st.session_state.sort_key
+    ascending = st.session_state.sort_ascending
+    
+    if sort_key == 'name':
+        items.sort(key=lambda x: x['name'], reverse=not ascending)
+    elif sort_key == 'min':
+        items.sort(key=lambda x: x['min'], reverse=not ascending)
+    elif sort_key == 'max':
+        items.sort(key=lambda x: x['max'], reverse=not ascending)
+    elif sort_key == 'price':
+        items.sort(key=lambda x: x['price'], reverse=not ascending)
+    
+    return [item['index'] for item in items]
+
+def toggle_sort(key):
+    """정렬 토글 함수"""
+    if st.session_state.sort_key == key:
+        st.session_state.sort_ascending = not st.session_state.sort_ascending
+    else:
+        st.session_state.sort_key = key
+        st.session_state.sort_ascending = True
+
+def get_sort_indicator(key):
+    """정렬 방향 표시"""
+    if st.session_state.sort_key == key:
+        return " ▲" if st.session_state.sort_ascending else " ▼"
+    return ""
+
+# 아이템 헤더 (정렬 버튼)
 hcol1, hcol2, hcol3, hcol4, hcol5 = st.columns([3.5, 1.4, 1.4, 3, 0.7])
 with hcol1:
-    st.write("물품이름")
+    if st.button(f"물품이름{get_sort_indicator('name')}", key="sort_name"):
+        toggle_sort('name')
+        st.rerun()
 with hcol2:
-    st.write("최소구매")
+    if st.button(f"최소{get_sort_indicator('min')}", key="sort_min"):
+        toggle_sort('min')
+        st.rerun()
 with hcol3:
-    st.write("최대구매")
+    if st.button(f"최대{get_sort_indicator('max')}", key="sort_max"):
+        toggle_sort('max')
+        st.rerun()
 with hcol4:
-    st.write("물품단가")
+    if st.button(f"물품단가{get_sort_indicator('price')}", key="sort_price"):
+        toggle_sort('price')
+        st.rerun()
 with hcol5:
     st.write("선택")
+
+# 정렬된 인덱스 가져오기
+sorted_indices = get_sorted_indices()
 
 # 아이템 입력 필드 생성
 item_names = []
@@ -487,7 +557,7 @@ item_prices = []
 min_quantities = []
 max_quantities = []
 
-for i in range(st.session_state.item_count):
+for i in sorted_indices:
     col1, col2, col3, col4, col5 = st.columns([3.5, 1.4, 1.4, 3, 0.7])
     is_disabled = not st.session_state.get(f'item_usable_{i}', True)
     
