@@ -432,7 +432,8 @@ with st.expander("📁 엑셀 파일로 관리하기", expanded=False):
                 if budget_loaded is not None:
                     # 세션 스테이트 초기화 및 데이터 로드
                     st.session_state['budget'] = budget_loaded
-                    st.session_state['item_count'] = len(df_items_loaded)
+                    # 기본 5줄, 업로드된 개수가 더 많으면 그만큼 생성
+                    st.session_state['item_count'] = max(5, len(df_items_loaded))
                     
                     for i, (_, row) in enumerate(df_items_loaded.iterrows()):
                         st.session_state[f'item_name_{i}'] = str(row['물품이름']) if pd.notna(row['물품이름']) else ''
@@ -539,11 +540,14 @@ for i in range(st.session_state.item_count):
         )
     
     with col5:
+        # 기본값 설정 (session_state에 없을 때만)
+        if f'item_usable_{i}' not in st.session_state:
+            st.session_state[f'item_usable_{i}'] = True
+        
         item_usable = st.checkbox(
             f'물품{i+1}', 
             label_visibility='collapsed',
-            key=f'item_usable_{i}',
-            value=st.session_state.get(f'item_usable_{i}', True)
+            key=f'item_usable_{i}'
         )
         st.write("")
     
