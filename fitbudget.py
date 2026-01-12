@@ -206,12 +206,12 @@ def on_max_change(index):
 
 
 def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
-    """메모이제이션 + 역추적 방식의 예산 계산 함수"""
+    """메모이제이션 + 마지막 아이템 나눗셈 처리"""
     try:
         text_out = f'사용해야 할 예산은 {format(budget,",")}원입니다.\n'
         item_count = len(prices)
         
-        # labels와 prices를 결합하여 prices 기준으로 내림차순 정렬
+        # 정렬
         combined = zip(prices, labels, base_quantity, limited_quantity)
         sorted_combined = sorted(combined, reverse=True)
         prices, labels, base_quantity, limited_quantity = map(list, zip(*sorted_combined))
@@ -224,31 +224,37 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
             text_out += f"품목 #{n_prt + 1:02d} {label} = {prices[n_prt]:7,d} 원 ({base_quantity[n_prt]:3d}  ~ {limited_quantity[n_prt]:3d})\n"
         text_out += '_' * (text_width * 2 + 13) + '\n'
         
-        # 기본 구매량 처리
+        # 전처리
         total_budget = budget
         fixed_budget = sum(a * b for a, b in zip(base_quantity, prices))
         remaining_budget = budget - fixed_budget
         limits = [lim - base for lim, base in zip(limited_quantity, base_quantity)]
+        last_idx = item_count - 1
         
         time_limit = 20
         start_time = time.time()
         memo = {}
         call_count = 0
         
-        # 1단계: 메모이제이션으로 해 개수 계산
+        # 1단계: 마지막 아이템 제외하고 해 존재 여부 계산
         def count_solutions(idx, remaining):
             nonlocal call_count
             call_count += 1
             
-            # 시간 제한 체크
-            if call_count % 10000 == 0:
+            if call_count % 100000 == 0:
                 if time.time() - start_time > time_limit:
                     raise TimeoutError(f"시간초과: {time_limit}초 경과")
             
             if remaining < 0:
                 return 0
-            if idx == item_count:
-                return 1 if remaining == 0 else 0
+            
+            # 마지막 직전 아이템까지 왔으면, 마지막 아이템으로 나눠떨어지는지 체크
+            if idx == last_idx:
+                qty = remaining // prices[last_idx]
+                if qty <= limits[last_idx] and remaining % prices[last_idx] == 0:
+                    return 1
+                return 0
+            
             if (idx, remaining) in memo:
                 return memo[(idx, remaining)]
             
@@ -264,16 +270,19 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
         
         exact_count = count_solutions(0, remaining_budget)
         
-        # 2단계: 역추적으로 조합 복원
+        # 2단계: 역추적
         cases_exact = []
         
         def reconstruct(idx, remaining, current):
             if time.time() - start_time > time_limit:
                 raise TimeoutError(f"시간초과: {time_limit}초 경과")
             
-            if idx == item_count:
-                if remaining == 0:
-                    cases_exact.append(current[:])
+            # 마지막 아이템: 나눗셈으로 처리
+            if idx == last_idx:
+                if remaining % prices[last_idx] == 0:
+                    qty = remaining // prices[last_idx]
+                    if qty <= limits[last_idx]:
+                        cases_exact.append(current + [qty])
                 return
             
             for qty in range(limits[idx] + 1):
@@ -283,42 +292,39 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
                 
                 next_remaining = remaining - cost
                 # 해가 존재하는 경로만 탐색
-                if memo.get((idx + 1, next_remaining), 0) > 0 or (idx + 1 == item_count and next_remaining == 0):
+                if memo.get((idx + 1, next_remaining), 0) > 0:
                     current.append(qty)
                     reconstruct(idx + 1, next_remaining, current)
                     current.pop()
+                # 마지막 직전이면 직접 체크
+                elif idx + 1 == last_idx:
+                    if next_remaining % prices[last_idx] == 0:
+                        qty_last = next_remaining // prices[last_idx]
+                        if qty_last <= limits[last_idx]:
+                            cases_exact.append(current + [qty, qty_last])
         
         if exact_count > 0:
             reconstruct(0, remaining_budget, [])
         
-        # 정확한 해가 없으면 근사치 탐색
+        # 근사치 처리 (정확한 해가 없을 때)
         cases_close = []
         if exact_count == 0:
-            # 가장 가까운 금액 찾기
             best_remaining = remaining_budget
-            for (idx, rem), cnt in memo.items():
-                if idx == item_count - 1 and cnt > 0:
-                    final_rem = rem % prices[-1] if prices[-1] > 0 else rem
-                    if final_rem < best_remaining:
-                        best_remaining = final_rem
             
-            # 근사치 조합 복원
-            def reconstruct_close(idx, remaining, current):
+            def find_closest(idx, remaining, current):
+                nonlocal best_remaining
                 if time.time() - start_time > time_limit:
                     return
                 
-                if idx == item_count:
-                    if remaining == best_remaining:
-                        cases_close.append(current[:])
-                    return
-                
-                if idx == item_count - 1:
-                    # 마지막 아이템: 최대한 구매
-                    qty = min(remaining // prices[idx], limits[idx])
-                    if remaining - qty * prices[idx] == best_remaining:
-                        current.append(qty)
-                        cases_close.append(current[:])
-                        current.pop()
+                if idx == last_idx:
+                    qty = min(remaining // prices[last_idx], limits[last_idx])
+                    leftover = remaining - qty * prices[last_idx]
+                    if leftover < best_remaining:
+                        best_remaining = leftover
+                        cases_close.clear()
+                        cases_close.append(current + [qty])
+                    elif leftover == best_remaining:
+                        cases_close.append(current + [qty])
                     return
                 
                 for qty in range(limits[idx] + 1):
@@ -326,10 +332,10 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
                     if cost > remaining:
                         break
                     current.append(qty)
-                    reconstruct_close(idx + 1, remaining - cost, current)
+                    find_closest(idx + 1, remaining - cost, current)
                     current.pop()
             
-            reconstruct_close(0, remaining_budget, [])
+            find_closest(0, remaining_budget, [])
         
         end_time = time.time()
         execution_time = end_time - start_time
@@ -344,10 +350,8 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
             text_out += f'예산에 맞는 {len(cases_exact):,d}개의 완벽한 방법을 찾았습니다.\n'
             list_show = cases_exact
         
-        # base_quantity 더하기
         list_show = (np.array(list_show) + np.array(base_quantity)).tolist() if list_show else []
         text_out += f'이 프로그램은 {call_count:,d}개의 상태를 계산했습니다.\n'
-        text_out += f'(메모이제이션 상태 수: {len(memo):,d})\n'
         
         return text_out, list_show, prices
     
