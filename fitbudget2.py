@@ -418,7 +418,7 @@ result_text = '''예산과 단가를 입력한 후\n계산하기 버튼을 누�
 result_list, result_prices = [], []
 
 st.title("편리한 예산🍞만들기")
-st.markdown('<p style="color: #a8a888;text-align: right;">SimBud beta (Budget Simulator V1.60)by 교사 박현수, 버그 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
+st.markdown('<p style="color: #a8a888;text-align: right;">SimBud beta (Budget Simulator V2.00)by 교사 박현수, 버그 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
 
 # 엑셀 업로드/다운로드 섹션
 with st.expander("📁 엑셀 파일로 관리하기", expanded=False):
