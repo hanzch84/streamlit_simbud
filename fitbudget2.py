@@ -294,21 +294,73 @@ def create_template_excel():
     output.seek(0)
     return output
 
+def extract_number(value):
+    """문자열에서 숫자만 추출 (원, 개 등 단위 제거)"""
+    if pd.isna(value):
+        return None
+    if isinstance(value, (int, float)):
+        return value
+    # 문자열에서 숫자와 소수점만 추출
+    import re
+    nums = re.sub(r'[^\d.]', '', str(value))
+    if nums:
+        return float(nums)
+    return None
+
 def load_from_excel(uploaded_file):
     """엑셀 파일에서 데이터 로드 (단일 시트)"""
     try:
         df = pd.read_excel(uploaded_file, sheet_name=0, header=None)
         
         # 첫 행에서 예산 읽기 (A1='예산', B1=값)
-        budget = int(df.iloc[0, 1])
+        budget = int(extract_number(df.iloc[0, 1]))
         
         # 3행부터 물품 데이터 (3행은 헤더: 물품이름, 단가, 최소구매, 최대구매)
         df_items = df.iloc[3:].copy()
         df_items.columns = ['물품이름', '단가', '최소구매', '최대구매']
-        df_items = df_items.dropna(subset=['단가'])  # 단가가 없는 행 제외
+        
+        # 단가: 단위 제거 후 숫자 변환
+        df_items['단가'] = df_items['단가'].apply(extract_number)
+        df_items['물품이름'] = df_items['물품이름'].fillna('')
+        
+        # 단가가 없거나 0인 행 제외
+        df_items = df_items.dropna(subset=['단가'])
+        df_items = df_items[df_items['단가'] > 0]
         df_items = df_items.reset_index(drop=True)
         
-        return budget, df_items
+        # 최소구매, 최대구매: 숫자 변환 후 예산 기준 검증
+        items_data = []
+        for _, row in df_items.iterrows():
+            price = int(row['단가'])
+            max_possible = budget // price if price > 0 else 0
+            
+            # 최소구매: NaN이면 0, 불가능하면 0
+            min_qty = extract_number(row['최소구매'])
+            if min_qty is None or min_qty < 0 or min_qty > max_possible:
+                min_qty = 0
+            else:
+                min_qty = int(min_qty)
+            
+            # 최대구매: NaN이면 max_possible, 불가능하면 max_possible
+            max_qty = extract_number(row['최대구매'])
+            if max_qty is None or max_qty <= 0 or max_qty > max_possible:
+                max_qty = max_possible
+            else:
+                max_qty = int(max_qty)
+            
+            # 최소가 최대보다 크면 최소를 0으로
+            if min_qty > max_qty:
+                min_qty = 0
+            
+            items_data.append({
+                '물품이름': row['물품이름'],
+                '단가': price,
+                '최소구매': min_qty,
+                '최대구매': max_qty
+            })
+        
+        df_result = pd.DataFrame(items_data)
+        return budget, df_result
     except Exception as e:
         st.error(f"파일 로드 오류: {e}")
         return None, None
@@ -379,8 +431,8 @@ with st.expander("📁 엑셀 파일로 관리하기", expanded=False):
                 st.session_state['budget'] = budget_loaded
                 st.session_state['item_count'] = len(df_items_loaded)
                 
-                for i, row in df_items_loaded.iterrows():
-                    st.session_state[f'item_name_{i}'] = str(row['물품이름'])
+                for i, (_, row) in enumerate(df_items_loaded.iterrows()):
+                    st.session_state[f'item_name_{i}'] = str(row['물품이름']) if pd.notna(row['물품이름']) else ''
                     st.session_state[f'item_price_{i}'] = int(row['단가'])
                     st.session_state[f'item_min_{i}'] = int(row['최소구매'])
                     st.session_state[f'item_max_{i}'] = int(row['최대구매'])
