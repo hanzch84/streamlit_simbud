@@ -278,7 +278,7 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
 def create_template_excel():
     """엑셀 양식 생성"""
     output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
         # 설정 시트 (예산)
         df_config = pd.DataFrame({'항목': ['예산'], '값': [100000]})
         df_config.to_excel(writer, sheet_name='설정', index=False)
@@ -313,7 +313,7 @@ def load_from_excel(uploaded_file):
 def create_result_excel(result_text, df_result):
     """결과를 엑셀 파일로 생성"""
     output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
         # 텍스트 결과를 DataFrame으로 변환
         text_lines = result_text.split('\n')
         df_text = pd.DataFrame({'계산 결과': text_lines})
