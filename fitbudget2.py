@@ -577,9 +577,6 @@ with col_label_fixed:
 # 계산 버튼
 with col_right:
     if st.button("계산하기"):
-        # 계산 전 최신 상태로 업데이트
-        update_all_items()
-        
         if budget_input == "" or budget_input <= 0:
             result_text = '예산을 정확히 입력하세요.(*0보다 큰 자연수)'
         elif len(item_prices) <= 1:
