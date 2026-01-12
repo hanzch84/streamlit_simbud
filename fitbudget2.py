@@ -76,17 +76,18 @@ def update_all_items():
             st.session_state[f"item_max_limit_{i}"] = max_possible
             st.session_state[f"item_disabled_{i}"] = False
             
-            # 현재 최대값이 상한을 초과하면 조정
+            # 최대구매: 0이면 max_possible로 설정, 상한 초과하면 조정
             current_max = st.session_state.get(f"item_max_{i}", 0)
-            if current_max > max_possible:
+            if current_max == 0 or current_max > max_possible:
                 st.session_state[f"item_max_{i}"] = max_possible
             
-            # 현재 최소값이 최대값을 초과하면 조정
+            # 최소구매: 최대값 초과하면 조정 (0 초기화는 유지)
             current_min = st.session_state.get(f"item_min_{i}", 0)
             if current_min > st.session_state.get(f"item_max_{i}", 0):
                 st.session_state[f"item_min_{i}"] = st.session_state.get(f"item_max_{i}", 0)
         else:
             st.session_state[f"item_disabled_{i}"] = True
+            st.session_state[f"item_max_{i}"] = 0
 
 def on_budget_change():
     """예산 변경 콜백"""
@@ -277,7 +278,7 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
 def create_template_excel():
     """엑셀 양식 생성"""
     output = BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         # 설정 시트 (예산)
         df_config = pd.DataFrame({'항목': ['예산'], '값': [100000]})
         df_config.to_excel(writer, sheet_name='설정', index=False)
@@ -312,7 +313,7 @@ def load_from_excel(uploaded_file):
 def create_result_excel(result_text, df_result):
     """결과를 엑셀 파일로 생성"""
     output = BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         # 텍스트 결과를 DataFrame으로 변환
         text_lines = result_text.split('\n')
         df_text = pd.DataFrame({'계산 결과': text_lines})
