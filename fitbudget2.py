@@ -422,25 +422,31 @@ with st.expander("📁 엑셀 파일로 관리하기", expanded=False):
     
     with col_upload:
         st.write("**파일 업로드**")
-        uploaded_file = st.file_uploader("엑셀 파일 선택", type=['xlsx'], label_visibility='collapsed')
+        uploaded_file = st.file_uploader("엑셀 파일 선택", type=['xlsx'], label_visibility='collapsed', key='excel_uploader')
         
         if uploaded_file is not None:
-            budget_loaded, df_items_loaded = load_from_excel(uploaded_file)
-            if budget_loaded is not None:
-                # 세션 스테이트 초기화 및 데이터 로드
-                st.session_state['budget'] = budget_loaded
-                st.session_state['item_count'] = len(df_items_loaded)
-                
-                for i, (_, row) in enumerate(df_items_loaded.iterrows()):
-                    st.session_state[f'item_name_{i}'] = str(row['물품이름']) if pd.notna(row['물품이름']) else ''
-                    st.session_state[f'item_price_{i}'] = int(row['단가'])
-                    st.session_state[f'item_min_{i}'] = int(row['최소구매'])
-                    st.session_state[f'item_max_{i}'] = int(row['최대구매'])
-                    st.session_state[f'item_usable_{i}'] = True
-                
-                update_all_items()
-                st.success(f"✅ 데이터 로드 완료! 예산: {budget_loaded:,}원, 물품: {len(df_items_loaded)}개")
-                st.rerun()
+            # 이미 로드한 파일인지 확인 (파일명과 크기로 체크)
+            file_key = f"{uploaded_file.name}_{uploaded_file.size}"
+            if st.session_state.get('loaded_file_key') != file_key:
+                budget_loaded, df_items_loaded = load_from_excel(uploaded_file)
+                if budget_loaded is not None:
+                    # 세션 스테이트 초기화 및 데이터 로드
+                    st.session_state['budget'] = budget_loaded
+                    st.session_state['item_count'] = len(df_items_loaded)
+                    
+                    for i, (_, row) in enumerate(df_items_loaded.iterrows()):
+                        st.session_state[f'item_name_{i}'] = str(row['물품이름']) if pd.notna(row['물품이름']) else ''
+                        st.session_state[f'item_price_{i}'] = int(row['단가'])
+                        st.session_state[f'item_min_{i}'] = int(row['최소구매'])
+                        st.session_state[f'item_max_{i}'] = int(row['최대구매'])
+                        st.session_state[f'item_usable_{i}'] = True
+                    
+                    update_all_items()
+                    st.session_state['loaded_file_key'] = file_key
+                    st.success(f"✅ 데이터 로드 완료! 예산: {budget_loaded:,}원, 물품: {len(df_items_loaded)}개")
+                    st.rerun()
+            else:
+                st.success(f"✅ 데이터 로드 완료! 예산: {st.session_state.get('budget', 0):,}원, 물품: {st.session_state.get('item_count', 0)}개")
 
 # 예산 입력
 col_label_budget, col_input_budget = st.columns([3, 7])
