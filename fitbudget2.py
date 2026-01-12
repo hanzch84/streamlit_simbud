@@ -487,19 +487,25 @@ if 'sort_key' not in st.session_state:
     st.session_state.sort_key = None
     st.session_state.sort_ascending = True
 
-def get_sorted_indices():
-    """현재 정렬 기준에 따라 정렬된 인덱스 반환"""
+def apply_sort():
+    """정렬 적용 - session_state 데이터를 실제로 재정렬"""
+    sort_key = st.session_state.sort_key
+    if sort_key is None:
+        return
+    
+    # 현재 데이터 수집
     items = []
     for i in range(st.session_state.item_count):
         items.append({
-            'index': i,
             'name': st.session_state.get(f'item_name_{i}', ''),
             'price': st.session_state.get(f'item_price_{i}', 0),
             'min': st.session_state.get(f'item_min_{i}', 0),
             'max': st.session_state.get(f'item_max_{i}', 0),
+            'usable': st.session_state.get(f'item_usable_{i}', True),
+            'disabled': st.session_state.get(f'item_disabled_{i}', True),
+            'max_limit': st.session_state.get(f'item_max_limit_{i}', 9999),
         })
     
-    sort_key = st.session_state.sort_key
     ascending = st.session_state.sort_ascending
     
     if sort_key == 'name':
@@ -511,7 +517,15 @@ def get_sorted_indices():
     elif sort_key == 'price':
         items.sort(key=lambda x: x['price'], reverse=not ascending)
     
-    return [item['index'] for item in items]
+    # 정렬된 순서로 session_state 업데이트
+    for i, item in enumerate(items):
+        st.session_state[f'item_name_{i}'] = item['name']
+        st.session_state[f'item_price_{i}'] = item['price']
+        st.session_state[f'item_min_{i}'] = item['min']
+        st.session_state[f'item_max_{i}'] = item['max']
+        st.session_state[f'item_usable_{i}'] = item['usable']
+        st.session_state[f'item_disabled_{i}'] = item['disabled']
+        st.session_state[f'item_max_limit_{i}'] = item['max_limit']
 
 def toggle_sort(key):
     """정렬 토글 함수"""
@@ -520,6 +534,7 @@ def toggle_sort(key):
     else:
         st.session_state.sort_key = key
         st.session_state.sort_ascending = True
+    apply_sort()
 
 def get_sort_indicator(key):
     """정렬 방향 표시"""
@@ -548,16 +563,13 @@ with hcol4:
 with hcol5:
     st.write("선택")
 
-# 정렬된 인덱스 가져오기
-sorted_indices = get_sorted_indices()
-
 # 아이템 입력 필드 생성
 item_names = []
 item_prices = []
 min_quantities = []
 max_quantities = []
 
-for i in sorted_indices:
+for i in range(st.session_state.item_count):
     col1, col2, col3, col4, col5 = st.columns([3.5, 1.4, 1.4, 3, 0.7])
     is_disabled = not st.session_state.get(f'item_usable_{i}', True)
     
