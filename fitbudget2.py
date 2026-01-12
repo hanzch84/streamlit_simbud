@@ -276,34 +276,37 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
         return f'에러입니다.: {e}', [], prices
 
 def create_template_excel():
-    """엑셀 양식 생성"""
+    """엑셀 양식 생성 (단일 시트)"""
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        # 설정 시트 (예산)
-        df_config = pd.DataFrame({'항목': ['예산'], '값': [100000]})
-        df_config.to_excel(writer, sheet_name='설정', index=False)
-        
-        # 물품 시트
-        df_items = pd.DataFrame({
-            '물품이름': ['물품1', '물품2', '물품3'],
-            '단가': [10000, 15000, 20000],
-            '최소구매': [0, 0, 0],
-            '최대구매': [10, 6, 5]
-        })
-        df_items.to_excel(writer, sheet_name='물품목록', index=False)
+        # 예산 행 + 물품 목록을 하나의 시트에
+        rows = [
+            ['예산', 100000, '', ''],
+            ['', '', '', ''],
+            ['물품이름', '단가', '최소구매', '최대구매'],
+            ['물품1', 10000, 0, 10],
+            ['물품2', 15000, 0, 6],
+            ['물품3', 20000, 0, 5],
+        ]
+        df = pd.DataFrame(rows)
+        df.to_excel(writer, sheet_name='예산계산', index=False, header=False)
     
     output.seek(0)
     return output
 
 def load_from_excel(uploaded_file):
-    """엑셀 파일에서 데이터 로드"""
+    """엑셀 파일에서 데이터 로드 (단일 시트)"""
     try:
-        # 설정 시트 읽기
-        df_config = pd.read_excel(uploaded_file, sheet_name='설정')
-        budget = int(df_config[df_config['항목'] == '예산']['값'].values[0])
+        df = pd.read_excel(uploaded_file, sheet_name=0, header=None)
         
-        # 물품 시트 읽기
-        df_items = pd.read_excel(uploaded_file, sheet_name='물품목록')
+        # 첫 행에서 예산 읽기 (A1='예산', B1=값)
+        budget = int(df.iloc[0, 1])
+        
+        # 3행부터 물품 데이터 (3행은 헤더: 물품이름, 단가, 최소구매, 최대구매)
+        df_items = df.iloc[3:].copy()
+        df_items.columns = ['물품이름', '단가', '최소구매', '최대구매']
+        df_items = df_items.dropna(subset=['단가'])  # 단가가 없는 행 제외
+        df_items = df_items.reset_index(drop=True)
         
         return budget, df_items
     except Exception as e:
@@ -311,17 +314,25 @@ def load_from_excel(uploaded_file):
         return None, None
 
 def create_result_excel(result_text, df_result):
-    """결과를 엑셀 파일로 생성"""
+    """결과를 엑셀 파일로 생성 (단일 시트)"""
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        # 텍스트 결과를 DataFrame으로 변환
+        # 텍스트 결과를 행으로 변환
         text_lines = result_text.split('\n')
-        df_text = pd.DataFrame({'계산 결과': text_lines})
-        df_text.to_excel(writer, sheet_name='결과요약', index=False)
+        rows = [[line] for line in text_lines]
         
-        # 결과 DataFrame
+        # 빈 행 추가
+        rows.append([''])
+        
+        # DataFrame 헤더 추가
         if df_result is not None and len(df_result) > 0:
-            df_result.to_excel(writer, sheet_name='구매조합', index=False)
+            rows.append(df_result.columns.tolist())
+            # DataFrame 데이터 추가
+            for _, row in df_result.iterrows():
+                rows.append(row.tolist())
+        
+        df_output = pd.DataFrame(rows)
+        df_output.to_excel(writer, sheet_name='계산결과', index=False, header=False)
     
     output.seek(0)
     return output
