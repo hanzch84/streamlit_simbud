@@ -741,37 +741,40 @@ with col_right:
             result_text = '중복된 단가가 있습니다.'
         else:
             overlay_container = st.empty()
-            overlay_container.markdown("""
-            <style>
-            .overlay {
-                position: fixed;top: 0;left: 0;width: 100%;height: 100%;
-                background: rgba(0, 0, 0, 0.7);z-index: 999;display: flex;
-                justify-content: center;align-items: center;flex-direction: column;}
-            .spinner {
-                width: 50px;height: 50px;border: 5px solid #333;
-                border-top: 5px solid #FFC83D;border-radius: 50%;
-                animation: spin 1s linear infinite;margin-bottom: 15px;}
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }}
-            .countdown {
-                color: #FFC83D;font-size: 48px;font-weight: bold;margin-bottom: 10px;}
-            .calc-text {color: white;font-size: 18px;}
-            </style>
-            <div class="overlay">
-                <div class="spinner"></div>
-                <div class="countdown" id="countdown">20</div>
-                <div class="calc-text">계산 중...</div>
-            </div>
-            <script>
-                var timeLeft = 20;
-                var countdownEl = document.getElementById('countdown');
-                var timer = setInterval(function() {
-                    timeLeft--;
-                    if (countdownEl) countdownEl.textContent = timeLeft;
-                    if (timeLeft <= 0) clearInterval(timer);
-                }, 1000);
-            </script>""", unsafe_allow_html=True)
+            import streamlit.components.v1 as components
+            with overlay_container:
+                components.html("""
+                <style>
+                .overlay {
+                    position: fixed;top: 0;left: 0;width: 100%;height: 100%;
+                    background: rgba(0, 0, 0, 0.7);z-index: 9999;display: flex;
+                    justify-content: center;align-items: center;flex-direction: column;}
+                .spinner {
+                    width: 50px;height: 50px;border: 5px solid #333;
+                    border-top: 5px solid #FFC83D;border-radius: 50%;
+                    animation: spin 1s linear infinite;margin-bottom: 15px;}
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }}
+                .countdown {
+                    color: #FFC83D;font-size: 48px;font-weight: bold;margin-bottom: 10px;}
+                .calc-text {color: white;font-size: 18px;}
+                </style>
+                <div class="overlay">
+                    <div class="spinner"></div>
+                    <div class="countdown" id="countdown">20</div>
+                    <div class="calc-text">계산 중...</div>
+                </div>
+                <script>
+                    var timeLeft = 20;
+                    var countdownEl = document.getElementById('countdown');
+                    var timer = setInterval(function() {
+                        timeLeft--;
+                        if (countdownEl) countdownEl.textContent = timeLeft;
+                        if (timeLeft <= 0) clearInterval(timer);
+                    }, 1000);
+                </script>
+                """, height=0)
 
             result_text, result_list, result_prices, result_labels = calculate_budget(
                 budget_input, item_names, item_prices, min_quantities, max_quantities
