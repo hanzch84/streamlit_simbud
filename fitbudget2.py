@@ -41,11 +41,12 @@ st.markdown(
             border-radius: 12px !important;
             background-color: transparent !important;
             color: #FFC83D !important;
-            padding: 6px 14px !important;
+            padding: 6px 6px !important;
             font-weight: bold !important;
             transition: all 0.3s ease !important;
             min-height: auto !important;
             line-height: 1.4 !important;
+            white-space: nowrap !important;
         }
         [data-testid="stBaseButton-primary"]:hover,
         [data-testid="stBaseButton-primary"]:focus,
