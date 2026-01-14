@@ -42,8 +42,8 @@ st.markdown(
             border-radius: 12px !important;
             background-color: transparent !important;
             color: #FFC83D !important;
-            padding: 4px 4px !important;
-            margin: 12px 0 !important;
+            padding: 6px 6px !important;
+            margin: 8px 0 !important;
             font-weight: bold !important;
             transition: all 0.3s ease !important;
             min-height: auto !important;
@@ -496,7 +496,8 @@ with st.expander("📁 엑셀 파일로 관리하기", expanded=False):
             label="📥 양식 다운로드",
             data=template_excel,
             file_name="예산계산_양식.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="primary"
         )
     
     with col_upload:
@@ -778,7 +779,8 @@ try:
             label="📥 결과 다운로드 (Excel)",
             data=result_excel,
             file_name="예산계산_결과.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="primary"
         )
 except:
     pass
