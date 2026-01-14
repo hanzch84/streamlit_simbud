@@ -40,13 +40,20 @@ st.markdown(
             border-radius: 12px !important;
             background-color: transparent !important;
             color: #FFC83D !important;
-            padding: 8px 20px !important;
+            padding: 4px 12px !important;
             font-weight: bold !important;
             transition: all 0.3s ease !important;
+            min-height: auto !important;
+            line-height: 1.2 !important;
         }
-        [data-testid="stBaseButton-primary"]:hover {
+        [data-testid="stBaseButton-primary"]:hover,
+        [data-testid="stBaseButton-primary"]:focus,
+        [data-testid="stBaseButton-primary"]:active {
             background-color: #FFC83D !important;
-            color: #1a1a1a !important;
+            color: #000000 !important;
+        }
+        [data-testid="stBaseButton-primary"] p {
+            color: inherit !important;
         }
         
         /* 정렬 버튼 스타일 (기존 유지 - 일반 버튼 스타일 오버라이드) */
