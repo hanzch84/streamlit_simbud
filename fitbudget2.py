@@ -745,13 +745,33 @@ with col_right:
             <style>
             .overlay {
                 position: fixed;top: 0;left: 0;width: 100%;height: 100%;
-                background: rgba(0, 0, 0, 0.5);z-index: 999;display: flex;
-                justify-content: center;align-items: center;}
-            .spinner {margin-bottom: 10px;}
+                background: rgba(0, 0, 0, 0.7);z-index: 999;display: flex;
+                justify-content: center;align-items: center;flex-direction: column;}
+            .spinner {
+                width: 50px;height: 50px;border: 5px solid #333;
+                border-top: 5px solid #FFC83D;border-radius: 50%;
+                animation: spin 1s linear infinite;margin-bottom: 15px;}
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }}
+            .countdown {
+                color: #FFC83D;font-size: 48px;font-weight: bold;margin-bottom: 10px;}
+            .calc-text {color: white;font-size: 18px;}
             </style>
-            <div class="overlay"><div><div class="spinner">
-                        <span class="fa fa-spinner fa-spin fa-3x"></span>
-                    </div><div style="color: white;">계산 중...</div></div></div>""", unsafe_allow_html=True)
+            <div class="overlay">
+                <div class="spinner"></div>
+                <div class="countdown" id="countdown">20</div>
+                <div class="calc-text">계산 중...</div>
+            </div>
+            <script>
+                var timeLeft = 20;
+                var countdownEl = document.getElementById('countdown');
+                var timer = setInterval(function() {
+                    timeLeft--;
+                    if (countdownEl) countdownEl.textContent = timeLeft;
+                    if (timeLeft <= 0) clearInterval(timer);
+                }, 1000);
+            </script>""", unsafe_allow_html=True)
 
             result_text, result_list, result_prices, result_labels = calculate_budget(
                 budget_input, item_names, item_prices, min_quantities, max_quantities
