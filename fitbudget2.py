@@ -34,16 +34,33 @@ st.markdown(
         h3, p { color: #FFC83D; }
         [data-testid="baseButton-secondary"],[data-testid="stDataFrameResizable"]{width: 100% !important;}
         
-        /* 정렬 버튼 스타일 */
+        /* 물품추가, 계산하기 버튼 스타일 */
+        .stButton > button {
+            border: 2px solid #FFC83D !important;
+            border-radius: 12px !important;
+            background-color: transparent !important;
+            color: #FFC83D !important;
+            padding: 8px 20px !important;
+            font-weight: bold !important;
+            transition: all 0.3s ease !important;
+        }
+        .stButton > button:hover {
+            background-color: #FFC83D !important;
+            color: #1a1a1a !important;
+        }
+        
+        /* 정렬 버튼 스타일 (기존 유지 - 일반 버튼 스타일 오버라이드) */
         button[kind="secondary"][data-testid="stBaseButton-secondary"] {
             background-color: transparent !important;
             border: none !important;
+            border-radius: 0 !important;
             padding: 0 !important;
             font-size: 14px !important;
             color: #FFC83D !important;
             cursor: pointer;
         }
         button[kind="secondary"][data-testid="stBaseButton-secondary"]:hover {
+            background-color: transparent !important;
             color: #FFE082 !important;
             text-decoration: underline;
         }
