@@ -27,7 +27,8 @@ st.markdown(
         input[type="number"], textarea[aria-label="결과 출력"], input[type="text"], 
         [data-testid="stVerticalBlock"] > div:first-child {margin: 2px;}
         input[aria-label="budget"]{margin: 0px;font-size: 24px;font-weight: bold;}
-        [data-testid="stNotificationContentWarning"]{margin: -8px;font-size: 16px;}
+        [data-testid="stNotificationContentWarning"]{margin: -8px; padding: 8px 12px !important; font-size: 16px;}
+        [data-testid="stAlert"]{padding: 4px 8px !important; margin: 0 !important;}
         [data-testid="stHorizontalBlock"] { margin-bottom: -18px; }
         [data-testid="column"] { margin-right: -4px; margin-left: -4px; }
         .stDataFrame { width: 100% !important; }
@@ -40,11 +41,11 @@ st.markdown(
             border-radius: 12px !important;
             background-color: transparent !important;
             color: #FFC83D !important;
-            padding: 4px 12px !important;
+            padding: 6px 14px !important;
             font-weight: bold !important;
             transition: all 0.3s ease !important;
             min-height: auto !important;
-            line-height: 1.2 !important;
+            line-height: 1.4 !important;
         }
         [data-testid="stBaseButton-primary"]:hover,
         [data-testid="stBaseButton-primary"]:focus,
