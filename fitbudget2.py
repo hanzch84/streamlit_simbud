@@ -578,6 +578,42 @@ with col_input_budget:
 if 'item_count' not in st.session_state:
     st.session_state.item_count = 5
 
+# 중복 단가 상태 초기화
+if 'has_duplicate_prices' not in st.session_state:
+    st.session_state.has_duplicate_prices = False
+
+def find_duplicate_price_indices(prices_with_indices):
+    """중복된 단가의 인덱스 찾기 (첫 번째 제외한 중복 항목 반환)"""
+    seen = {}
+    duplicates_to_uncheck = []
+    
+    for idx, price in prices_with_indices:
+        if price in seen:
+            duplicates_to_uncheck.append(idx)
+        else:
+            seen[price] = idx
+    
+    return duplicates_to_uncheck
+
+def uncheck_duplicate_prices():
+    """중복된 단가 항목의 체크 해제 (첫 번째만 유지)"""
+    # 활성화된 항목의 (원본 인덱스, 단가) 수집
+    prices_with_indices = []
+    for i in range(st.session_state.item_count):
+        if st.session_state.get(f'item_usable_{i}', True):
+            price = st.session_state.get(f'item_price_{i}', 0)
+            if price > 0:
+                prices_with_indices.append((i, price))
+    
+    # 중복 항목 찾기
+    duplicates_to_uncheck = find_duplicate_price_indices(prices_with_indices)
+    
+    # 중복 항목 체크 해제
+    for idx in duplicates_to_uncheck:
+        st.session_state[f'item_usable_{idx}'] = False
+    
+    st.session_state.has_duplicate_prices = False
+
 # 정렬 상태 초기화
 if 'sort_key' not in st.session_state:
     st.session_state.sort_key = None
@@ -763,19 +799,27 @@ with col_right:
         
         if budget_input == "" or budget_input <= 0:
             result_text = '예산을 정확히 입력하세요.(*0보다 큰 자연수)'
+            st.session_state.has_duplicate_prices = False
         elif len(item_prices) <= 1:
             result_text = '최소 2종류 이상의 단가를 입력하세요.'
+            st.session_state.has_duplicate_prices = False
         elif min(item_prices) <= 0:
             result_text = '단가가 0보다 작거나 같습니다.'
+            st.session_state.has_duplicate_prices = False
         elif max(item_prices) > budget_input:
             result_text = '예산이 부족합니다.'
+            st.session_state.has_duplicate_prices = False
         elif max_limit_total < budget_input:
             result_text = f'최대구매금액({max_limit_total:,d}원)이 예산({budget_input:,d}원)보다 작아 예산을 다 쓸 수 없습니다.'
+            st.session_state.has_duplicate_prices = False
         elif fixed_budget > budget_input:
             result_text = f'최소구매금액({fixed_budget:,d}원)이 예산({budget_input:,d}원)보다 많아 예산 내에서 쓸 수 없습니다.'
+            st.session_state.has_duplicate_prices = False
         elif len(item_prices) != len(set(item_prices)):
             result_text = '중복된 단가가 있습니다.'
+            st.session_state.has_duplicate_prices = True
         else:
+            st.session_state.has_duplicate_prices = False
             overlay_container = st.empty()
             overlay_container.markdown("""
             <style>
@@ -801,6 +845,14 @@ with col_right:
                 budget_input, item_names, item_prices, min_quantities, max_quantities
             )
             overlay_container.empty()
+
+# 중복 단가 해제 버튼 (중복이 있을 때만 표시)
+if st.session_state.get('has_duplicate_prices', False):
+    col_dup_left, col_dup_btn, col_dup_right = st.columns([4, 4, 4])
+    with col_dup_btn:
+        if st.button("🔄 중복 단가 일괄 해제", type="primary", key="uncheck_duplicates"):
+            uncheck_duplicate_prices()
+            st.rerun()
 
 # 프로그레스 바 및 다운로드 버튼 영역 (계산하기 버튼과 코드박스 사이)
 download_area = st.empty()
