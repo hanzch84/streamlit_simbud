@@ -281,13 +281,14 @@ def calculate_budget(budget, labels, prices, base_quantity, limited_quantity):
         list_show = (np.array(list_show) + np.array(base_quantity)).tolist() if list_show else []
         text_out += f'이 프로그램은 {call_count:,d}개의 상태를 계산했습니다.\n'
         
-        return text_out, list_show, prices
+        # labels도 함께 반환
+        return text_out, list_show, prices, labels
     
     except TimeoutError as e:
-        return f'에러입니다.: {e}', [], prices
+        return f'에러입니다.: {e}', [], prices, labels
     except Exception as e:
         print('Error Message:', e)
-        return f'에러입니다.: {e}', [], prices
+        return f'에러입니다.: {e}', [], prices, labels
 
 def create_template_excel():
     """엑셀 양식 생성 (단일 시트)"""
@@ -379,8 +380,8 @@ def load_from_excel(uploaded_file):
         st.error(f"파일 로드 오류: {e}")
         return None, None
 
-def create_result_excel(result_text, df_result):
-    """결과를 엑셀 파일로 생성 (단일 시트)"""
+def create_result_excel(result_text, df_result, result_labels=None):
+    """결과를 엑셀 파일로 생성 (단일 시트) - 품목 이름 행 추가"""
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         # 텍스트 결과를 행으로 변환
@@ -392,7 +393,19 @@ def create_result_excel(result_text, df_result):
         
         # DataFrame 헤더 추가
         if df_result is not None and len(df_result) > 0:
+            # 품목 번호 행 추가 (#01, #02, ... 형식, 금액 컬럼은 빈 문자열)
+            if result_labels:
+                num_row = [f'#{i+1:02d}' for i in range(len(result_labels))] + ['']
+                rows.append(num_row)
+            
+            # 품목 이름 행 추가 (금액 컬럼은 빈 문자열)
+            if result_labels:
+                name_row = result_labels + ['']
+                rows.append(name_row)
+            
+            # 가격 헤더 행
             rows.append(df_result.columns.tolist())
+            
             # DataFrame 데이터 추가
             for _, row in df_result.iterrows():
                 rows.append(row.tolist())
@@ -415,7 +428,7 @@ result_text = '''예산과 단가를 입력한 후\n계산하기 버튼을 누�
 기본 구매량과 최대 구매량을 제한할 수 있습니다.
 '''
 
-result_list, result_prices = [], []
+result_list, result_prices, result_labels = [], [], []  # result_labels 추가
 
 st.title("편리한 예산🍞만들기")
 st.markdown('<p style="color: #a8a888;text-align: right;">SimBud beta (Budget Simulator V2.00)by 교사 박현수, 버그 및 개선 문의: <a href="mailto:hanzch84@gmail.com">hanzch84@gmail.com</a></p>', unsafe_allow_html=True)
@@ -687,7 +700,7 @@ with col_right:
                         <span class="fa fa-spinner fa-spin fa-3x"></span>
                     </div><div style="color: white;">계산 중...</div></div></div>""", unsafe_allow_html=True)
 
-            result_text, result_list, result_prices = calculate_budget(
+            result_text, result_list, result_prices, result_labels = calculate_budget(
                 budget_input, item_names, item_prices, min_quantities, max_quantities
             )
             overlay_container.empty()
@@ -707,8 +720,8 @@ try:
     if len(df_result) > 0:
         st.dataframe(df_result, hide_index=True, use_container_width=True)
         
-        # 결과 엑셀 다운로드 버튼
-        result_excel = create_result_excel(result_text, df_result)
+        # 결과 엑셀 다운로드 버튼 - result_labels 전달
+        result_excel = create_result_excel(result_text, df_result, result_labels)
         st.download_button(
             label="📥 결과 다운로드 (Excel)",
             data=result_excel,
