@@ -42,8 +42,8 @@ st.markdown(
             border-radius: 12px !important;
             background-color: transparent !important;
             color: #FFC83D !important;
-            padding: 6px 6px !important;
-            margin-top: 12px 0 !important;
+            padding: 4px 4px !important;
+            margin: 12px 0 !important;
             font-weight: bold !important;
             transition: all 0.3s ease !important;
             min-height: auto !important;
