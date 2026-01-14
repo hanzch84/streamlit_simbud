@@ -28,6 +28,7 @@ st.markdown(
         [data-testid="stVerticalBlock"] > div:first-child {margin: 2px;}
         input[aria-label="budget"]{margin: 0px;font-size: 24px;font-weight: bold;}
         [data-testid="stNotificationContentWarning"]{margin: -8px; padding: 6px 12px !important; font-size: 16px;}
+        [data-testid="stNotificationContentWarning"] p {margin: 0 !important; padding: 0 !important;}
         [data-testid="stAlert"]{padding: 6px 8px !important; margin: 0 !important;}
         [data-testid="stHorizontalBlock"] { margin-bottom: -18px; }
         [data-testid="column"] { margin-right: -4px; margin-left: -4px; }
