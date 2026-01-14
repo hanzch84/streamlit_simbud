@@ -43,6 +43,7 @@ st.markdown(
             background-color: transparent !important;
             color: #FFC83D !important;
             padding: 6px 6px !important;
+            margin: 8px 0 !important;
             font-weight: bold !important;
             transition: all 0.3s ease !important;
             min-height: auto !important;
