@@ -408,9 +408,12 @@ def load_from_excel(uploaded_file):
         st.error(f"파일 로드 오류: {e}")
         return None, None
 
-def create_result_excel(result_text, df_result, result_labels=None):
+def create_result_excel(result_text, df_result, result_labels=None, progress_callback=None):
     """결과를 엑셀 파일로 생성 (단일 시트) - 품목 이름 행 추가, 필터 및 셀 병합"""
     from openpyxl.utils import get_column_letter
+    
+    if progress_callback:
+        progress_callback(0.1, "데이터 준비 중...")
     
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -427,6 +430,9 @@ def create_result_excel(result_text, df_result, result_labels=None):
         
         # 가격 헤더 행 번호 저장 (필터용)
         price_header_row = None
+        
+        if progress_callback:
+            progress_callback(0.2, "데이터 구성 중...")
         
         # DataFrame 헤더 추가
         if df_result is not None and len(df_result) > 0:
@@ -448,8 +454,14 @@ def create_result_excel(result_text, df_result, result_labels=None):
             for _, row in df_result.iterrows():
                 rows.append(row.tolist())
         
+        if progress_callback:
+            progress_callback(0.4, "Excel 파일 생성 중...")
+        
         df_output = pd.DataFrame(rows)
         df_output.to_excel(writer, sheet_name='계산결과', index=False, header=False)
+        
+        if progress_callback:
+            progress_callback(0.7, "서식 적용 중...")
         
         # openpyxl로 추가 작업
         ws = writer.sheets['계산결과']
@@ -458,12 +470,18 @@ def create_result_excel(result_text, df_result, result_labels=None):
         for row_idx in range(1, summary_row_count + 1):
             ws.merge_cells(f'A{row_idx}:G{row_idx}')
         
+        if progress_callback:
+            progress_callback(0.9, "필터 적용 중...")
+        
         # 2. 가격 헤더 행에 필터 적용
         if price_header_row and df_result is not None and len(df_result) > 0:
             num_cols = len(df_result.columns)
             last_col = get_column_letter(num_cols)
             last_row = price_header_row + len(df_result)
             ws.auto_filter.ref = f'A{price_header_row}:{last_col}{last_row}'
+    
+    if progress_callback:
+        progress_callback(1.0, "완료!")
     
     output.seek(0)
     return output
@@ -725,6 +743,12 @@ with col_label_fixed:
 # 계산 버튼
 with col_right:
     if st.button("계산하기", type="primary"):
+        # 이전 엑셀 캐시 초기화
+        if 'excel_data' in st.session_state:
+            del st.session_state['excel_data']
+        if 'last_result_hash' in st.session_state:
+            del st.session_state['last_result_hash']
+        
         if budget_input == "" or budget_input <= 0:
             result_text = '예산을 정확히 입력하세요.(*0보다 큰 자연수)'
         elif len(item_prices) <= 1:
@@ -781,11 +805,28 @@ try:
     if len(df_result) > 0:
         st.dataframe(df_result, hide_index=True, use_container_width=True)
         
-        # 결과 엑셀 다운로드 버튼 - result_labels 전달
-        result_excel = create_result_excel(result_text, df_result, result_labels)
+        # 프로그레스 바로 엑셀 생성
+        if 'excel_data' not in st.session_state or st.session_state.get('last_result_hash') != hash(result_text):
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            def update_progress(value, message):
+                progress_bar.progress(value)
+                status_text.text(message)
+            
+            result_excel = create_result_excel(result_text, df_result, result_labels, update_progress)
+            
+            time.sleep(0.3)  # 완료 상태 잠시 표시
+            progress_bar.empty()
+            status_text.empty()
+            
+            st.session_state['excel_data'] = result_excel
+            st.session_state['last_result_hash'] = hash(result_text)
+        
+        # 다운로드 버튼
         st.download_button(
             label="📥 결과 다운로드 (Excel)",
-            data=result_excel,
+            data=st.session_state['excel_data'],
             file_name="예산계산_결과.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="primary"
