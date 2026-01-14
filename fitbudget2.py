@@ -111,25 +111,37 @@ def update_all_items():
         return
     
     for i in range(st.session_state.get('item_count', 5)):
-        item_price = st.session_state.get(f"item_price_{i}", 0)
-        if item_price > 0 and item_price <= budget:
-            max_possible = budget // item_price
-            # 최대 구매 가능 개수 상한 설정
-            st.session_state[f"item_max_limit_{i}"] = max_possible
-            st.session_state[f"item_disabled_{i}"] = False
-            
-            # 최대구매: 0이면 max_possible로 설정, 상한 초과하면 조정
-            current_max = st.session_state.get(f"item_max_{i}", 0)
-            if current_max == 0 or current_max > max_possible:
-                st.session_state[f"item_max_{i}"] = max_possible
-            
-            # 최소구매: 최대값 초과하면 조정 (0 초기화는 유지)
-            current_min = st.session_state.get(f"item_min_{i}", 0)
-            if current_min > st.session_state.get(f"item_max_{i}", 0):
-                st.session_state[f"item_min_{i}"] = st.session_state.get(f"item_max_{i}", 0)
-        else:
+        price_key = f"item_price_{i}"
+        
+        # 아직 session_state에 없으면 건너뜀
+        if price_key not in st.session_state:
+            continue
+        
+        item_price = st.session_state.get(price_key, 0)
+        
+        # 단가가 0인 경우 (미입력) - 현재 상태 유지, 건너뜀
+        if item_price == 0:
+            continue
+        
+        # 단가가 예산보다 큰 경우 - 비활성화
+        if item_price > budget:
             st.session_state[f"item_disabled_{i}"] = True
             st.session_state[f"item_max_{i}"] = 0
+            st.session_state[f"item_max_limit_{i}"] = 0
+            continue
+        
+        # 정상 케이스: 단가 > 0 and 단가 <= 예산
+        max_possible = budget // item_price
+        st.session_state[f"item_max_limit_{i}"] = max_possible
+        st.session_state[f"item_disabled_{i}"] = False
+        
+        # 예산 변경 시 최대구매를 max_possible로 재설정
+        st.session_state[f"item_max_{i}"] = max_possible
+        
+        # 최소구매: 최대값 초과하면 조정
+        current_min = st.session_state.get(f"item_min_{i}", 0)
+        if current_min > max_possible:
+            st.session_state[f"item_min_{i}"] = max_possible
 
 def on_budget_change():
     """예산 변경 콜백"""
