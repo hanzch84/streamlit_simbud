@@ -381,15 +381,24 @@ def load_from_excel(uploaded_file):
         return None, None
 
 def create_result_excel(result_text, df_result, result_labels=None):
-    """결과를 엑셀 파일로 생성 (단일 시트) - 품목 이름 행 추가"""
+    """결과를 엑셀 파일로 생성 (단일 시트) - 품목 이름 행 추가, 필터 및 셀 병합"""
+    from openpyxl.utils import get_column_letter
+    
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         # 텍스트 결과를 행으로 변환
         text_lines = result_text.split('\n')
         rows = [[line] for line in text_lines]
         
+        # 결과요약 행 수 저장 (셀 병합용)
+        summary_row_count = len(rows)
+        
         # 빈 행 추가
         rows.append([''])
+        summary_row_count += 1
+        
+        # 가격 헤더 행 번호 저장 (필터용)
+        price_header_row = None
         
         # DataFrame 헤더 추가
         if df_result is not None and len(df_result) > 0:
@@ -404,6 +413,7 @@ def create_result_excel(result_text, df_result, result_labels=None):
                 rows.append(name_row)
             
             # 가격 헤더 행
+            price_header_row = len(rows) + 1  # 1-based index for Excel
             rows.append(df_result.columns.tolist())
             
             # DataFrame 데이터 추가
@@ -412,6 +422,20 @@ def create_result_excel(result_text, df_result, result_labels=None):
         
         df_output = pd.DataFrame(rows)
         df_output.to_excel(writer, sheet_name='계산결과', index=False, header=False)
+        
+        # openpyxl로 추가 작업
+        ws = writer.sheets['계산결과']
+        
+        # 1. 상단 결과요약 A-G열 행별 셀 병합
+        for row_idx in range(1, summary_row_count + 1):
+            ws.merge_cells(f'A{row_idx}:G{row_idx}')
+        
+        # 2. 가격 헤더 행에 필터 적용
+        if price_header_row and df_result is not None and len(df_result) > 0:
+            num_cols = len(df_result.columns)
+            last_col = get_column_letter(num_cols)
+            last_row = price_header_row + len(df_result)
+            ws.auto_filter.ref = f'A{price_header_row}:{last_col}{last_row}'
     
     output.seek(0)
     return output
