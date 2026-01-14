@@ -27,8 +27,8 @@ st.markdown(
         input[type="number"], textarea[aria-label="결과 출력"], input[type="text"], 
         [data-testid="stVerticalBlock"] > div:first-child {margin: 2px;}
         input[aria-label="budget"]{margin: 0px;font-size: 24px;font-weight: bold;}
-        [data-testid="stNotificationContentWarning"]{margin: -8px; padding: 8px 12px !important; font-size: 16px;}
-        [data-testid="stAlert"]{padding: 4px 8px !important; margin: 0 !important;}
+        [data-testid="stNotificationContentWarning"]{margin: -8px; padding: 6px 12px !important; font-size: 16px;}
+        [data-testid="stAlert"]{padding: 6px 8px !important; margin: 0 !important;}
         [data-testid="stHorizontalBlock"] { margin-bottom: -18px; }
         [data-testid="column"] { margin-right: -4px; margin-left: -4px; }
         .stDataFrame { width: 100% !important; }
