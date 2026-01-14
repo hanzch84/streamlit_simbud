@@ -34,8 +34,8 @@ st.markdown(
         h3, p { color: #FFC83D; }
         [data-testid="baseButton-secondary"],[data-testid="stDataFrameResizable"]{width: 100% !important;}
         
-        /* 물품추가, 계산하기 버튼 스타일 */
-        .stButton > button {
+        /* 물품추가, 계산하기 버튼 스타일 (primary 버튼) */
+        [data-testid="stBaseButton-primary"] {
             border: 2px solid #FFC83D !important;
             border-radius: 12px !important;
             background-color: transparent !important;
@@ -44,7 +44,7 @@ st.markdown(
             font-weight: bold !important;
             transition: all 0.3s ease !important;
         }
-        .stButton > button:hover {
+        [data-testid="stBaseButton-primary"]:hover {
             background-color: #FFC83D !important;
             color: #1a1a1a !important;
         }
@@ -700,7 +700,7 @@ def add_item():
     st.session_state.item_count += 1
 
 with col_left:
-    if st.button("물품추가", on_click=add_item):
+    if st.button("물품추가", on_click=add_item, type="primary"):
         pass
 
 with col_label_fixed:
@@ -712,7 +712,7 @@ with col_label_fixed:
 
 # 계산 버튼
 with col_right:
-    if st.button("계산하기"):
+    if st.button("계산하기", type="primary"):
         if budget_input == "" or budget_input <= 0:
             result_text = '예산을 정확히 입력하세요.(*0보다 큰 자연수)'
         elif len(item_prices) <= 1:
