@@ -790,46 +790,57 @@ with col_right:
             )
             overlay_container.empty()
 
+# 프로그레스 바 및 다운로드 버튼 영역 (계산하기 버튼과 코드박스 사이)
+download_area = st.empty()
+
+# DataFrame 준비 (다운로드 버튼용)
+df_result = None
+try:
+    if result_list and result_prices:
+        df_result = pd.DataFrame(result_list, columns=[f'{price:,d}원' for price in result_prices])
+        df_result['금액'] = df_result.mul(result_prices).sum(axis=1)
+        
+        if len(df_result) > 0:
+            # 프로그레스 바로 엑셀 생성
+            if 'excel_data' not in st.session_state or st.session_state.get('last_result_hash') != hash(result_text):
+                with download_area.container():
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                    
+                    def update_progress(value, message):
+                        progress_bar.progress(value)
+                        status_text.text(message)
+                    
+                    result_excel = create_result_excel(result_text, df_result, result_labels, update_progress)
+                    
+                    time.sleep(0.3)  # 완료 상태 잠시 표시
+                    progress_bar.empty()
+                    status_text.empty()
+                    
+                    st.session_state['excel_data'] = result_excel
+                    st.session_state['last_result_hash'] = hash(result_text)
+            
+            # 다운로드 버튼
+            with download_area.container():
+                st.download_button(
+                    label="📥 결과 다운로드 (Excel)",
+                    data=st.session_state['excel_data'],
+                    file_name="예산계산_결과.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    type="primary"
+                )
+except:
+    pass
+
 # 결과 출력
 if len(result_text.split('\n')) < 30:
     st.code(result_text, language="java")
 else:
     st.text_area("결과 출력", result_text, height=300)
 
-# DataFrame 결과 및 다운로드
-df_result = None
+# DataFrame 결과 표시
 try:
-    df_result = pd.DataFrame(result_list, columns=[f'{price:,d}원' for price in result_prices])
-    df_result['금액'] = df_result.mul(result_prices).sum(axis=1)
-    
-    if len(df_result) > 0:
+    if df_result is not None and len(df_result) > 0:
         st.dataframe(df_result, hide_index=True, use_container_width=True)
-        
-        # 프로그레스 바로 엑셀 생성
-        if 'excel_data' not in st.session_state or st.session_state.get('last_result_hash') != hash(result_text):
-            progress_bar = st.progress(0)
-            status_text = st.empty()
-            
-            def update_progress(value, message):
-                progress_bar.progress(value)
-                status_text.text(message)
-            
-            result_excel = create_result_excel(result_text, df_result, result_labels, update_progress)
-            
-            time.sleep(0.3)  # 완료 상태 잠시 표시
-            progress_bar.empty()
-            status_text.empty()
-            
-            st.session_state['excel_data'] = result_excel
-            st.session_state['last_result_hash'] = hash(result_text)
-        
-        # 다운로드 버튼
-        st.download_button(
-            label="📥 결과 다운로드 (Excel)",
-            data=st.session_state['excel_data'],
-            file_name="예산계산_결과.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            type="primary"
-        )
 except:
     pass
